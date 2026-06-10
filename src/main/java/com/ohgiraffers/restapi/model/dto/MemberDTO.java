@@ -1,12 +1,19 @@
 package com.ohgiraffers.restapi.model.dto;
 
+import jakarta.validation.constraints.*;
+
 import java.time.LocalDate;
 import java.util.Date;
 
 public class MemberDTO {
     int memberNo;
+    @NotBlank(message = "아이디는 필수입니다.")
+    @Size(min = 4, max = 20, message = "아이디는 4자 이상 20자 이하여야 합니다.")
     String id;
+    @NotBlank(message = "이름은 필수입니다.")
     String name;
+    @NotBlank(message = "이메일은 필수입니다.")
+    @Email(message = "이메일 형식이 아닙니다.")
     String email;
 
     @Override

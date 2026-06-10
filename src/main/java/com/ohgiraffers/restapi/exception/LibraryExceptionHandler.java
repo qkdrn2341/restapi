@@ -3,8 +3,12 @@ package com.ohgiraffers.restapi.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestControllerAdvice //여러 Controller에서 발생한 예외를 한 곳에서 처리하고 JSON body로 응답
 public class LibraryExceptionHandler {
@@ -69,5 +73,18 @@ public class LibraryExceptionHandler {
         );
 
         return ResponseEntity.internalServerError().body(response);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(
+            MethodArgumentNotValidException e) {
+
+        Map<String, String> errors = new LinkedHashMap<>();
+
+        e.getBindingResult().getFieldErrors()
+                .forEach(error ->
+                        errors.put(error.getField(), error.getDefaultMessage()));
+
+        return ResponseEntity.badRequest().body(errors);
     }
 }
