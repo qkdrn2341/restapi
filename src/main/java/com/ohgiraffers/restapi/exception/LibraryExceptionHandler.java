@@ -1,5 +1,6 @@
 package com.ohgiraffers.restapi.exception;
 
+import com.ohgiraffers.restapi.model.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,8 +69,9 @@ public class LibraryExceptionHandler {
         ErrorResponse response = new ErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 HttpStatus.INTERNAL_SERVER_ERROR.name(),
-                "서버 내부 오류가 발생했습니다.",
+                "서버 내부 오류가 발생했습니다." + exception.getMessage(),
                 request.getRequestURI()
+
         );
 
         return ResponseEntity.internalServerError().body(response);

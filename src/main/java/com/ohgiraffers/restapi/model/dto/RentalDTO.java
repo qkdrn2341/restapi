@@ -6,9 +6,9 @@ import com.ohgiraffers.restapi.model.RentalStatus;
 import java.time.LocalDate;
 
 public class RentalDTO {
-    int rentalNo;
-    int memberNo;
-    int bookNo;
+    Integer rentalNo;
+    Integer memberNo;
+    Integer bookNo;
     LocalDate rentedAt;
     LocalDate dueDate;
     LocalDate returnedAt;
@@ -83,7 +83,7 @@ public class RentalDTO {
         this.status = status;
     }
 
-    public RentalDTO(int rentalNo, int memberNo, int bookNo, LocalDate rentedAt, LocalDate dueDate, LocalDate returnedAt, RentalStatus status) {
+    public RentalDTO(Integer rentalNo, Integer memberNo, Integer bookNo, LocalDate rentedAt, LocalDate dueDate, LocalDate returnedAt, RentalStatus status) {
         this.rentalNo = rentalNo;
         this.memberNo = memberNo;
         this.bookNo = bookNo;
@@ -95,4 +95,5 @@ public class RentalDTO {
 
     public RentalDTO() {
     }
+
 }

@@ -2,13 +2,12 @@ package com.ohgiraffers.restapi.model.dto;
 
 
 import com.ohgiraffers.restapi.model.BookStatus;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
 public class BookDTO {
-    int bookNo;
+    Integer bookNo;
     @NotNull
     @NotBlank
     String title;
@@ -17,8 +16,9 @@ public class BookDTO {
     String author;
     @NotNull
     @NotBlank
-    int isbn;
+    String isbn;
     BookStatus status;
+    @PastOrPresent
     LocalDate publishedAt;
 
     @Override
@@ -37,7 +37,7 @@ public class BookDTO {
         return bookNo;
     }
 
-    public void setBookNo(int bookNo) {
+    public void setBookNo(Integer bookNo) {
         this.bookNo = bookNo;
     }
 
@@ -69,11 +69,11 @@ public class BookDTO {
         return publishedAt;
     }
 
-    public int getIsbn() {
+    public String getIsbn() {
         return isbn;
     }
 
-    public void setIsbn(int isbn) {
+    public void setIsbn(String isbn) {
         this.isbn = isbn;
     }
 
@@ -81,9 +81,10 @@ public class BookDTO {
         this.publishedAt = publishedAt;
     }
 
-    public BookDTO(int bookNo, String title, String author, int isbn, BookStatus status, LocalDate publishedAt) {
+    public BookDTO(Integer bookNo, String title, String author, String isbn, BookStatus status, LocalDate publishedAt) {
         this.bookNo = bookNo;
         this.title = title;
+        this.isbn = isbn;
         this.author = author;
         this.status = status;
         this.publishedAt = publishedAt;

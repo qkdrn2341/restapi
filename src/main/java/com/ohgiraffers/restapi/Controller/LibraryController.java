@@ -1,8 +1,11 @@
 package com.ohgiraffers.restapi.Controller;
 
 import com.ohgiraffers.restapi.model.BookStatus;
+import com.ohgiraffers.restapi.model.RentalStatus;
 import com.ohgiraffers.restapi.model.dto.BookDTO;
 import com.ohgiraffers.restapi.model.dto.MemberDTO;
+import com.ohgiraffers.restapi.model.dto.RentalDTO;
+import com.ohgiraffers.restapi.model.response.ResponseMessage;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,32 +37,28 @@ public class LibraryController {
         members.add(new MemberDTO(temp++, "reader4", "거북이", "reader4@asd.com"));
         members.add(new MemberDTO(temp++, "reader5", "코끼리", "reader5@asd.com"));
 
-        books.add(new BookDTO(btemp++, "book1", "somebody1", 100001, BookStatus.AVAILABLE, LocalDate.now()));
-        books.add(new BookDTO(btemp++, "book2", "somebody2", 100002, BookStatus.RENTED, LocalDate.now()));
-        books.add(new BookDTO(btemp++, "book3", "somebody3", 100003, BookStatus.AVAILABLE, LocalDate.now()));
-        books.add(new BookDTO(btemp++, "book4", "somebody4", 100004, BookStatus.AVAILABLE, LocalDate.now()));
-        books.add(new BookDTO(btemp++, "book5", "somebody5", 100005, BookStatus.RENTED, LocalDate.now()));
-        books.add(new BookDTO(btemp++, "book6", "somebody6", 100006, BookStatus.AVAILABLE, LocalDate.now()));
-        books.add(new BookDTO(btemp++, "book7", "somebody7", 100007, BookStatus.RENTED, LocalDate.now()));
-        books.add(new BookDTO(btemp++, "book8", "somebody8", 100008, BookStatus.AVAILABLE, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book1", "somebody1", "100001", BookStatus.AVAILABLE, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book2", "somebody2", "100002", BookStatus.RENTED, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book3", "somebody3", "100003", BookStatus.AVAILABLE, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book4", "somebody4", "100004", BookStatus.AVAILABLE, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book5", "somebody5", "100005", BookStatus.RENTED, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book6", "somebody6", "100006", BookStatus.AVAILABLE, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book7", "somebody7", "100007", BookStatus.RENTED, LocalDate.now()));
+        books.add(new BookDTO(btemp++, "book8", "somebody8", "100008", BookStatus.AVAILABLE, LocalDate.now()));
 
     }
 
     @GetMapping("/members")
-    public ResponseEntity<List<MemberDTO>> getMembers() {
-        return ResponseEntity.ok(members);
-    }
+    public ResponseEntity<List<MemberDTO>> getMembers(
+            @RequestParam(required = false) String name) {
 
+        if (name == null || name.isBlank()) {
+            return ResponseEntity.ok(members);
+        }
 
-    /**
-     * 선택 검색 조건:
-     * name이 있으면 이름에 해당 글자가 포함된 회원만 조회한다.
-     * 검색 결과가 없어도 200 OK와 빈 배열을 응답한다.
-     */
-
-    @GetMapping("/members/{name}")
-    public ResponseEntity<List<MemberDTO>> getMember(@PathVariable String name) {
-        var mem = members.stream().filter(m -> m.getName().contains(name)).toList();
+        var mem = members.stream()
+                .filter(m -> m.getName().contains(name))
+                .toList();
 
         return ResponseEntity.ok(mem);
     }
@@ -134,24 +133,41 @@ public class LibraryController {
 
 
     @GetMapping("/books")
-    public List<BookDTO> getBooks() {
-        return books;
+    public List<BookDTO> getBooks(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) BookStatus status) {
+
+        List<BookDTO> result = books;
+
+        if (title != null && !title.isBlank()) {
+            result = result.stream()
+                    .filter(b -> b.getTitle().contains(title))
+                    .toList();
+        }
+
+        if (status != null) {
+            result = result.stream()
+                    .filter(b -> b.getStatus() == status)
+                    .toList();
+        }
+
+        return result;
     }
 
     @GetMapping("/books/{bookNo}")
     public ResponseEntity<BookDTO> getBookByBookNo(@PathVariable int bookNo) {
-        var result =  books.stream().filter(m-> m.getBookNo() == bookNo).findFirst();
 
-        if(result != null)
-            return ResponseEntity.ok(result.get());
-        else return ResponseEntity.notFound().build();
+        return books.stream()
+                .filter(b -> b.getBookNo() == bookNo)
+                .findFirst()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/books")
     public ResponseEntity<Map<String, Object>> addBook(@Valid @RequestBody BookDTO book) {
 
         book.setBookNo(btemp++);
-        book.setIsbn(123456);
         book.setPublishedAt(LocalDate.now());
 
         books.add(book);
@@ -162,12 +178,36 @@ public class LibraryController {
         URI location = URI.create("/books/" + book.getBookNo());
 
         return ResponseEntity.created(location)
-                .body(response);
+                .build();
 
     }
 
-    @PostMapping
-    public ResponseEntity<Map<String, Object>> rentBook(int memberNo, int bookNo) {
+    int rentalNo = 1;
+    @PostMapping("/rentals")
+    public ResponseEntity<Map<String, Object>> rentBook(@RequestBody RentalDTO info) {
+
+        var member = members.stream().filter(m -> m.getMemberNo() == info.getMemberNo()).findFirst();
+
+        var book = books.stream().filter(b -> b.getBookNo() == info.getBookNo()).findFirst();
+
+        if(book.isEmpty() || member.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        if(book.get().getStatus() == BookStatus.AVAILABLE){
+            book.get().setStatus(BookStatus.RENTED);
+            RentalDTO rental = new RentalDTO(
+                    rentalNo++,
+                    info.getMemberNo(),
+                    info.getBookNo(),
+                    LocalDate.now(),
+                    LocalDate.now().plusDays(14),
+                    null,
+                    RentalStatus.RENTED
+            );
+
+            return ResponseEntity.ok().build();
+        }
 
         return null;
     }

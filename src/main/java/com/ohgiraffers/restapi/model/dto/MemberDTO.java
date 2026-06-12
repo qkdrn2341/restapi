@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.Date;
 
 public class MemberDTO {
-    int memberNo;
+    Integer memberNo;
     @NotBlank(message = "아이디는 필수입니다.")
     @Size(min = 4, max = 20, message = "아이디는 4자 이상 20자 이하여야 합니다.")
     String id;
@@ -31,7 +31,7 @@ public class MemberDTO {
         return memberNo;
     }
 
-    public void setMemberNo(int memberNo) {
+    public void setMemberNo(Integer memberNo) {
         this.memberNo = memberNo;
     }
 
@@ -67,7 +67,7 @@ public class MemberDTO {
         this.jointedAt = jointedAt;
     }
 
-    public MemberDTO(int memberNo, String id, String name, String email) {
+    public MemberDTO(Integer memberNo, String id, String name, String email) {
         this.memberNo = memberNo;
         this.id = id;
         this.name = name;

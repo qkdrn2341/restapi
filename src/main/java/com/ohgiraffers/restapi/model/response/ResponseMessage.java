@@ -1,5 +1,6 @@
 package com.ohgiraffers.restapi.model.response;
 
+
 import lombok.*;
 
 import java.util.Map;
@@ -16,6 +17,8 @@ public class ResponseMessage {
     private int httpStatus;
     private String message;
     private Map<String, Object> results;
+
+
 
 
 }
